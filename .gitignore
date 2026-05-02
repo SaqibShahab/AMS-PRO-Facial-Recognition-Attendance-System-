@@ -1,0 +1,17 @@
+# --- Backend (Python) ---
+backend/__pycache__/
+backend/venv/
+backend/.env
+backend/*.csv
+backend/Attendance/
+backend/StudentDetails/
+
+# --- Frontend (React) ---
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.eslintcache
+
+# --- OS Specific ---
+.DS_Store
+Thumbs.db
