@@ -13,22 +13,29 @@ export default function App() {
     };
 
     return (
-        <div className="flex min-h-screen bg-gray-900 text-white font-sans selection:bg-green-500 selection:text-white">
-            <aside className="w-64 bg-gray-800 shadow-xl flex flex-col border-r border-gray-700">
-                <div className="p-6 border-b border-gray-700">
-                    <h1 className="text-xl font-bold text-green-400">AMS <span className="text-white">Pro</span></h1>
-                    <p className="text-xs text-gray-400 mt-1">Face Recognition System</p>
+        // Added flex-col for mobile, md:flex-row for desktop
+        <div className="flex flex-col md:flex-row min-h-screen bg-gray-900 text-white font-sans selection:bg-green-500 selection:text-white">
+
+            {/* SIDEBAR / TOP NAV - Full width on mobile, 64 (256px) on desktop */}
+            <aside className="w-full md:w-64 bg-gray-800 shadow-xl flex flex-col border-b md:border-b-0 md:border-r border-gray-700 shrink-0 z-20">
+                <div className="p-4 md:p-6 border-b border-gray-700 flex justify-between items-center md:block">
+                    <div>
+                        <h1 className="text-xl font-bold text-green-400">AMS <span className="text-white">Pro</span></h1>
+                        <p className="text-xs text-gray-400 mt-1">Face Recognition System</p>
+                    </div>
                 </div>
-                <nav className="flex-1 p-4 space-y-2">
+                {/* Scrollable horizontal nav on mobile, vertical on desktop */}
+                <nav className="p-3 md:p-4 flex md:flex-col gap-2 overflow-x-auto custom-scrollbar md:space-y-2">
                     <NavItem active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} icon="📊" label="Dashboard" />
                     <NavItem active={activeTab === 'register'} onClick={() => setActiveTab('register')} icon="👤" label="Enroll Student" />
                     <NavItem active={activeTab === 'attendance'} onClick={() => setActiveTab('attendance')} icon="📸" label="Mark Attendance" />
                 </nav>
             </aside>
 
-            <main className="flex-1 p-8 relative overflow-y-auto">
+            {/* MAIN CONTENT AREA */}
+            <main className="flex-1 p-4 md:p-8 relative overflow-y-auto w-full">
                 {notification && (
-                    <div className="absolute top-4 right-8 bg-green-500/90 backdrop-blur border border-green-400 text-white px-6 py-3 rounded-lg shadow-lg z-50 font-medium">
+                    <div className="absolute top-4 right-4 md:right-8 bg-green-500/90 backdrop-blur border border-green-400 text-white px-4 md:px-6 py-3 rounded-lg shadow-lg z-50 font-medium text-sm md:text-base animate-fade-in">
                         {notification}
                     </div>
                 )}
@@ -42,8 +49,9 @@ export default function App() {
 
 function NavItem({ active, onClick, icon, label }) {
     return (
-        <button onClick={onClick} className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 ${active ? 'bg-green-600 shadow-lg text-white' : 'text-gray-400 hover:bg-gray-700/50 hover:text-white'}`}>
-            <span className="mr-3 text-lg">{icon}</span><span className="font-medium">{label}</span>
+        <button onClick={onClick} className={`flex items-center p-3 rounded-lg transition-all duration-200 whitespace-nowrap ${active ? 'bg-green-600 shadow-lg text-white' : 'text-gray-400 hover:bg-gray-700/50 hover:text-white'}`}>
+            <span className="mr-2 md:mr-3 text-lg">{icon}</span>
+            <span className="font-medium text-sm md:text-base">{label}</span>
         </button>
     );
 }
@@ -84,15 +92,16 @@ function DashboardView({ notify }) {
             const data = await res.json();
             notify(data.message);
             setNewSubjectText('');
-            fetchSubjects(); // Refresh list
+            fetchSubjects();
         } catch (e) { notify("Error adding subject."); }
     };
 
     return (
         <div className="space-y-6 animate-fade-in max-w-5xl mx-auto">
-            <h2 className="text-3xl font-bold tracking-tight">System Dashboard</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md col-span-1 flex flex-col">
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">System Dashboard</h2>
+            {/* Stack on mobile, 3 columns on tablet/desktop */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-md col-span-1 flex flex-col h-80 md:h-auto">
                     <h3 className="text-gray-300 font-bold mb-4 flex items-center"><span className="mr-2">📚</span> Subjects Manager</h3>
 
                     <div className="flex gap-2 mb-4">
@@ -111,26 +120,26 @@ function DashboardView({ notify }) {
                     </div>
                 </div>
 
-                <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md col-span-2 min-h-[400px]">
+                <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-md col-span-1 lg:col-span-2 min-h-[400px]">
                     {selectedSubject ? (
                         <>
                             <h3 className="text-xl font-bold text-white mb-4">Students in <span className="text-green-400">{selectedSubject}</span></h3>
                             {enrolledStudents.length === 0 ? (
                                 <p className="text-gray-400">No students enrolled yet.</p>
                             ) : (
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {enrolledStudents.map((student, idx) => (
-                                        <div key={idx} className="bg-gray-900 border border-gray-700 p-4 rounded-lg flex justify-between">
+                                        <div key={idx} className="bg-gray-900 border border-gray-700 p-4 rounded-lg flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                                             <span className="font-medium text-gray-200">{student.Name}</span>
-                                            <span className="text-xs bg-gray-700 px-2 py-1 rounded text-gray-300">ID: {student.Enrollment}</span>
+                                            <span className="text-xs bg-gray-700 px-2 py-1 rounded text-gray-300 w-fit">ID: {student.Enrollment}</span>
                                         </div>
                                     ))}
                                 </div>
                             )}
                         </>
                     ) : (
-                        <div className="h-full flex flex-col items-center justify-center text-gray-500">
-                            <span className="text-4xl mb-3">👈</span><p>Select a subject to view enrolled students.</p>
+                        <div className="h-full flex flex-col items-center justify-center text-gray-500 text-center p-4">
+                            <span className="text-4xl mb-3">👆</span><p>Select a subject to view enrolled students.</p>
                         </div>
                     )}
                 </div>
@@ -161,7 +170,7 @@ function RegisterView({ notify }) {
     }, []);
 
     const startCamera = () => {
-        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+        navigator.mediaDevices.getUserMedia({ video: true, facingMode: 'user' }).then(stream => {
             if (videoRef.current) videoRef.current.srcObject = stream;
             setIsCameraActive(true); setCaptureComplete(false);
         }).catch(err => notify("Camera access denied."));
@@ -213,10 +222,10 @@ function RegisterView({ notify }) {
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-            <h2 className="text-3xl font-bold tracking-tight">Enroll New Student</h2>
-            <div className="bg-gray-800 p-8 rounded-xl border border-gray-700/50 shadow-xl flex flex-col md:flex-row gap-8">
-                <div className="flex-1 space-y-5">
+        <div className="max-w-4xl mx-auto space-y-6 animate-fade-in w-full">
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Enroll New Student</h2>
+            <div className="bg-gray-800 p-4 md:p-8 rounded-xl border border-gray-700/50 shadow-xl flex flex-col md:flex-row gap-6 md:gap-8">
+                <div className="flex-1 space-y-4 md:space-y-5">
                     <div>
                         <label className="block text-sm text-gray-400 mb-1">Enrollment ID</label>
                         <input type="text" value={enrollment} onChange={(e) => setEnrollment(e.target.value)}
@@ -247,11 +256,11 @@ function RegisterView({ notify }) {
                             {isTraining ? 'Compiling Logic...' : '🧠 Train AI Model Now'}
                         </button>
                     ) : (
-                        <div className="flex gap-3 pt-2">
+                        <div className="flex flex-col sm:flex-row gap-3 pt-2">
                             {!isCameraActive ? (
-                                <button onClick={startCamera} className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg shadow-lg">📷 Start Camera</button>
+                                <button onClick={startCamera} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg shadow-lg">📷 Start Camera</button>
                             ) : (
-                                <button onClick={handleCapture} disabled={isCapturing} className={`flex-1 py-3 rounded-lg font-bold shadow-lg ${isCapturing ? 'bg-gray-700' : 'bg-green-600 hover:bg-green-500 text-white'}`}>
+                                <button onClick={handleCapture} disabled={isCapturing} className={`w-full py-3 rounded-lg font-bold shadow-lg ${isCapturing ? 'bg-gray-700' : 'bg-green-600 hover:bg-green-500 text-white'}`}>
                                     {isCapturing ? `Scanning (${progress}/50)...` : 'Scan Face'}
                                 </button>
                             )}
@@ -259,8 +268,8 @@ function RegisterView({ notify }) {
                     )}
                 </div>
 
-                <div className="flex-1 bg-black rounded-lg overflow-hidden border border-gray-700 flex items-center justify-center relative min-h-[250px]">
-                    {!isCameraActive && !captureComplete && <div className="absolute text-gray-500 text-center z-10"><span className="text-4xl">📷</span><p>Offline</p></div>}
+                <div className="flex-1 bg-black rounded-lg overflow-hidden border border-gray-700 flex items-center justify-center relative min-h-[250px] md:min-h-[300px]">
+                    {!isCameraActive && !captureComplete && <div className="absolute text-gray-500 text-center z-10 p-4"><span className="text-4xl">📷</span><p className="mt-2">Camera Offline</p></div>}
                     <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover opacity-90"></video>
                     {isCapturing && <div className="absolute inset-0 border-4 border-green-500/50 animate-pulse rounded-lg z-20"></div>}
                 </div>
@@ -306,7 +315,7 @@ function AttendanceView({ notify }) {
 
     const startSession = () => {
         setIsSessionActive(true);
-        navigator.mediaDevices.getUserMedia({ video: true })
+        navigator.mediaDevices.getUserMedia({ video: true, facingMode: 'user' })
             .then(stream => { if (videoRef.current) videoRef.current.srcObject = stream; })
             .catch(err => notify("Camera access denied."));
     };
@@ -339,20 +348,20 @@ function AttendanceView({ notify }) {
     };
 
     return (
-        <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
-            <div className="flex justify-between items-center">
-                <h2 className="text-3xl font-bold tracking-tight">Daily Attendance</h2>
+        <div className="max-w-6xl mx-auto space-y-6 animate-fade-in w-full">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Daily Attendance</h2>
                 {isSessionActive && (
-                    <button onClick={stopSession} className="bg-red-600 hover:bg-red-500 text-white font-bold px-6 py-3 rounded-lg flex items-center shadow-lg transition-all">
-                        <span className="mr-2">✖</span> Close Camera Session
+                    <button onClick={stopSession} className="w-full md:w-auto bg-red-600 hover:bg-red-500 text-white font-bold px-6 py-3 rounded-lg flex justify-center items-center shadow-lg transition-all">
+                        <span className="mr-2">✖</span> Close Camera
                     </button>
                 )}
             </div>
 
             {!isSessionActive && (
                 <div className="space-y-6">
-                    <div className="bg-gray-800 p-6 rounded-xl border border-gray-700/50 shadow-xl flex gap-4 items-end">
-                        <div className="flex-1">
+                    <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700/50 shadow-xl flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+                        <div className="flex-1 w-full">
                             <label className="block text-sm text-gray-400 mb-2 font-medium">Select Subject Roster</label>
                             <select value={subject} onChange={(e) => setSubject(e.target.value)}
                                 className="w-full bg-gray-900 border border-gray-600 rounded-lg p-3 text-white appearance-none focus:border-green-500 transition-all cursor-pointer">
@@ -361,46 +370,46 @@ function AttendanceView({ notify }) {
                             </select>
                         </div>
                         {subject && (
-                            <button onClick={startSession} className="bg-green-600 hover:bg-green-500 text-white font-bold px-8 py-3 rounded-lg shadow-lg transition-all flex items-center">
-                                <span className="mr-2 text-xl">📷</span> Start Live Scanner
+                            <button onClick={startSession} className="w-full sm:w-auto bg-green-600 hover:bg-green-500 text-white font-bold px-8 py-3 rounded-lg shadow-lg transition-all flex justify-center items-center">
+                                <span className="mr-2 text-xl">📷</span> Start Scanner
                             </button>
                         )}
                     </div>
 
                     {subject && (
                         <div className="bg-gray-800 rounded-xl border border-gray-700/50 shadow-xl overflow-hidden animate-fade-in">
-                            <div className="p-6 border-b border-gray-700 bg-gray-800/50 flex justify-between items-center">
-                                <h3 className="text-xl font-bold text-white">Attendance Spreadsheet: <span className="text-green-400">{subject}</span></h3>
+                            <div className="p-4 md:p-6 border-b border-gray-700 bg-gray-800/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                <h3 className="text-lg md:text-xl font-bold text-white">Roster: <span className="text-green-400">{subject}</span></h3>
                                 <span className="bg-gray-900 px-3 py-1 rounded text-sm text-gray-400 font-medium">
                                     {presentIds.length} / {allStudents.length} Present
                                 </span>
                             </div>
 
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse">
+                            <div className="overflow-x-auto w-full">
+                                <table className="w-full text-left border-collapse min-w-[500px]">
                                     <thead>
-                                        <tr className="bg-gray-900 text-gray-400 text-sm tracking-wide">
-                                            <th className="p-4 border-b border-gray-700">Enrollment ID</th>
-                                            <th className="p-4 border-b border-gray-700">Student Name</th>
-                                            <th className="p-4 border-b border-gray-700">Today's Status</th>
+                                        <tr className="bg-gray-900 text-gray-400 text-xs md:text-sm tracking-wide">
+                                            <th className="p-3 md:p-4 border-b border-gray-700">Enrollment ID</th>
+                                            <th className="p-3 md:p-4 border-b border-gray-700">Student Name</th>
+                                            <th className="p-3 md:p-4 border-b border-gray-700">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {allStudents.length === 0 ? (
                                             <tr>
-                                                <td colSpan="3" className="p-8 text-center text-gray-500">No students enrolled in {subject}.</td>
+                                                <td colSpan="3" className="p-8 text-center text-gray-500">No students enrolled.</td>
                                             </tr>
                                         ) : (
                                             allStudents.map((student) => {
                                                 const isPresent = presentIds.includes(student.Enrollment);
                                                 return (
                                                     <tr key={student.Enrollment} className="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors">
-                                                        <td className="p-4 text-gray-400 font-mono">{student.Enrollment}</td>
-                                                        <td className="p-4 text-gray-200 font-medium">{student.Name}</td>
-                                                        <td className="p-4">
+                                                        <td className="p-3 md:p-4 text-gray-400 font-mono text-sm">{student.Enrollment}</td>
+                                                        <td className="p-3 md:p-4 text-gray-200 font-medium text-sm md:text-base">{student.Name}</td>
+                                                        <td className="p-3 md:p-4">
                                                             {isPresent
-                                                                ? <span className="inline-block bg-green-500/20 text-green-400 border border-green-500/30 px-3 py-1 rounded-full text-xs font-bold tracking-wider shadow-[0_0_10px_rgba(34,197,94,0.1)]">PRESENT</span>
-                                                                : <span className="inline-block bg-gray-700 text-gray-400 px-3 py-1 rounded-full text-xs font-bold tracking-wider">ABSENT</span>}
+                                                                ? <span className="inline-block bg-green-500/20 text-green-400 border border-green-500/30 px-2 py-1 rounded-full text-xs font-bold tracking-wider">PRESENT</span>
+                                                                : <span className="inline-block bg-gray-700 text-gray-400 px-2 py-1 rounded-full text-xs font-bold tracking-wider">ABSENT</span>}
                                                         </td>
                                                     </tr>
                                                 );
@@ -415,8 +424,8 @@ function AttendanceView({ notify }) {
             )}
 
             {isSessionActive && (
-                <div className="flex flex-col lg:flex-row gap-8 animate-fade-in">
-                    <div className="flex-1 bg-gray-800 p-6 rounded-xl border border-gray-700/50 shadow-xl space-y-6">
+                <div className="flex flex-col lg:flex-row gap-6 md:gap-8 animate-fade-in">
+                    <div className="flex-1 bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700/50 shadow-xl space-y-4 md:space-y-6">
                         <div className="bg-black rounded-lg overflow-hidden border border-gray-700 aspect-video relative">
                             <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover"></video>
                         </div>
@@ -425,22 +434,22 @@ function AttendanceView({ notify }) {
                         </button>
                     </div>
 
-                    <div className="flex-1 bg-gray-800 p-6 rounded-xl border border-gray-700/50 shadow-xl flex flex-col max-h-[600px]">
-                        <h3 className="text-xl font-bold text-gray-200 mb-6 flex justify-between items-center">
+                    <div className="flex-1 bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700/50 shadow-xl flex flex-col h-[400px] md:max-h-[600px]">
+                        <h3 className="text-lg md:text-xl font-bold text-gray-200 mb-4 md:mb-6 flex justify-between items-center">
                             Live Roster
-                            <span className="text-sm bg-gray-900 px-3 py-1 rounded-full text-green-400 border border-gray-700">{presentIds.length} Present</span>
+                            <span className="text-xs md:text-sm bg-gray-900 px-3 py-1 rounded-full text-green-400 border border-gray-700">{presentIds.length} Present</span>
                         </h3>
                         <div className="overflow-y-auto flex-1 pr-2 custom-scrollbar">
-                            <div className="space-y-3">
+                            <div className="space-y-2 md:space-y-3">
                                 {allStudents.map((student) => {
                                     const isPresent = presentIds.includes(student.Enrollment);
                                     return (
-                                        <div key={student.Enrollment} className={`flex justify-between items-center p-4 rounded-lg border transition-colors ${isPresent ? 'bg-green-900/20 border-green-500/50' : 'bg-gray-900 border-gray-700'}`}>
+                                        <div key={student.Enrollment} className={`flex justify-between items-center p-3 md:p-4 rounded-lg border transition-colors ${isPresent ? 'bg-green-900/20 border-green-500/50' : 'bg-gray-900 border-gray-700'}`}>
                                             <div>
-                                                <p className={`font-bold ${isPresent ? 'text-green-400' : 'text-gray-200'}`}>{student.Name}</p>
-                                                <p className="text-sm text-gray-500">ID: {student.Enrollment}</p>
+                                                <p className={`font-bold text-sm md:text-base ${isPresent ? 'text-green-400' : 'text-gray-200'}`}>{student.Name}</p>
+                                                <p className="text-xs md:text-sm text-gray-500">ID: {student.Enrollment}</p>
                                             </div>
-                                            {isPresent ? <span className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.3)]">PRESENT</span> : <span className="bg-gray-700 text-gray-300 text-xs font-bold px-3 py-1 rounded-full">ABSENT</span>}
+                                            {isPresent ? <span className="bg-green-500 text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-full">PRESENT</span> : <span className="bg-gray-700 text-gray-300 text-[10px] md:text-xs font-bold px-2 py-1 rounded-full">ABSENT</span>}
                                         </div>
                                     );
                                 })}
