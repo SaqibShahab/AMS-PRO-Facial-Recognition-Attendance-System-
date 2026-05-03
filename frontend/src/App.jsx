@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 
+// Production Backend URL
+const API_BASE_URL = 'https://ams-pro-backend-rrtn.onrender.com';
+
 export default function App() {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [notification, setNotification] = useState('');
@@ -45,7 +48,7 @@ function NavItem({ active, onClick, icon, label }) {
     );
 }
 
-// --- DASHBOARD (Now with Add Subject) ---
+// --- DASHBOARD ---
 function DashboardView({ notify }) {
     const [subjects, setSubjects] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState(null);
@@ -53,7 +56,7 @@ function DashboardView({ notify }) {
     const [newSubjectText, setNewSubjectText] = useState('');
 
     const fetchSubjects = () => {
-        fetch('http://localhost:5000/api/subjects')
+        fetch(`${API_BASE_URL}/api/subjects`)
             .then(res => res.json())
             .then(data => setSubjects(data))
             .catch(err => console.error(err));
@@ -64,7 +67,7 @@ function DashboardView({ notify }) {
     const handleSubjectClick = async (subject) => {
         setSelectedSubject(subject);
         try {
-            const res = await fetch(`http://localhost:5000/api/students/${subject}`);
+            const res = await fetch(`${API_BASE_URL}/api/students/${subject}`);
             const data = await res.json();
             setEnrolledStudents(data);
         } catch (e) { notify("Error fetching students."); }
@@ -73,7 +76,7 @@ function DashboardView({ notify }) {
     const handleAddSubject = async () => {
         if (!newSubjectText) return;
         try {
-            const res = await fetch('http://localhost:5000/api/subjects', {
+            const res = await fetch(`${API_BASE_URL}/api/subjects`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ subject: newSubjectText })
@@ -92,7 +95,6 @@ function DashboardView({ notify }) {
                 <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-md col-span-1 flex flex-col">
                     <h3 className="text-gray-300 font-bold mb-4 flex items-center"><span className="mr-2">📚</span> Subjects Manager</h3>
 
-                    {/* Add Subject Input */}
                     <div className="flex gap-2 mb-4">
                         <input type="text" value={newSubjectText} onChange={(e) => setNewSubjectText(e.target.value)}
                             className="w-full bg-gray-900 border border-gray-600 rounded-lg p-2 text-sm text-white uppercase focus:border-green-500" placeholder="New Subject" />
@@ -137,7 +139,7 @@ function DashboardView({ notify }) {
     );
 }
 
-// --- ENROLL STUDENT (Now uses Dropdown for Subject) ---
+// --- ENROLL STUDENT ---
 function RegisterView({ notify }) {
     const [enrollment, setEnrollment] = useState('');
     const [name, setName] = useState('');
@@ -152,7 +154,7 @@ function RegisterView({ notify }) {
     const videoRef = useRef(null);
 
     useEffect(() => {
-        fetch('http://localhost:5000/api/subjects')
+        fetch(`${API_BASE_URL}/api/subjects`)
             .then(res => res.json())
             .then(data => setSubjectsList(data));
         return () => stopCamera();
@@ -191,7 +193,7 @@ function RegisterView({ notify }) {
                 const imageData = canvas.toDataURL('image/jpeg');
                 count++; setProgress(count);
                 try {
-                    await fetch('http://localhost:5000/register_frame', {
+                    await fetch(`${API_BASE_URL}/register_frame`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ image: imageData, enrollment, name, subject, frameCount: count })
                     });
@@ -203,7 +205,7 @@ function RegisterView({ notify }) {
     const handleTrainModel = async () => {
         setIsTraining(true); notify("Training AI... Please wait.");
         try {
-            const response = await fetch('http://localhost:5000/train', { method: 'POST' });
+            const response = await fetch(`${API_BASE_URL}/train`, { method: 'POST' });
             const data = await response.json(); notify(data.message);
             setCaptureComplete(false); setEnrollment(''); setName(''); setSubject('');
         } catch (error) { notify("Error connecting to server."); }
@@ -225,8 +227,6 @@ function RegisterView({ notify }) {
                         <input type="text" value={name} onChange={(e) => setName(e.target.value)}
                             className="w-full bg-gray-900 border border-gray-600 rounded-lg p-3 text-white focus:border-green-500" disabled={isCapturing} />
                     </div>
-
-                    {/* THE NEW DROPDOWN */}
                     <div>
                         <label className="block text-sm text-gray-400 mb-1">Select Subject</label>
                         <select value={subject} onChange={(e) => setSubject(e.target.value)} disabled={isCapturing}
@@ -269,7 +269,7 @@ function RegisterView({ notify }) {
     );
 }
 
-// --- ATTENDANCE VIEW (Now with Pre-Session Spreadsheet) ---
+// --- ATTENDANCE VIEW ---
 function AttendanceView({ notify }) {
     const [subject, setSubject] = useState('');
     const [subjectsList, setSubjectsList] = useState([]);
@@ -279,15 +279,13 @@ function AttendanceView({ notify }) {
     const [presentIds, setPresentIds] = useState([]);
     const videoRef = useRef(null);
 
-    // 1. Fetch available subjects on load
     useEffect(() => {
-        fetch('http://localhost:5000/api/subjects')
+        fetch(`${API_BASE_URL}/api/subjects`)
             .then(res => res.json())
             .then(data => setSubjectsList(data));
         return () => stopSession();
     }, []);
 
-    // 2. THE NEW SPREADSHEET LOGIC: Fetch data the moment a subject is selected
     useEffect(() => {
         if (subject) {
             fetchStudents();
@@ -299,11 +297,11 @@ function AttendanceView({ notify }) {
     }, [subject]);
 
     const fetchStudents = async () => {
-        try { const res = await fetch(`http://localhost:5000/api/students/${subject}`); setAllStudents(await res.json()); } catch (e) { }
+        try { const res = await fetch(`${API_BASE_URL}/api/students/${subject}`); setAllStudents(await res.json()); } catch (e) { }
     };
 
     const fetchLiveAttendance = async () => {
-        try { const res = await fetch(`http://localhost:5000/api/attendance/${subject}`); setPresentIds(await res.json()); } catch (e) { }
+        try { const res = await fetch(`${API_BASE_URL}/api/attendance/${subject}`); setPresentIds(await res.json()); } catch (e) { }
     };
 
     const startSession = () => {
@@ -319,7 +317,6 @@ function AttendanceView({ notify }) {
             videoRef.current.srcObject = null;
         }
         setIsSessionActive(false);
-        // Refresh the spreadsheet when closing the camera
         if (subject) fetchLiveAttendance();
     };
 
@@ -331,7 +328,7 @@ function AttendanceView({ notify }) {
         const imageData = canvas.toDataURL('image/jpeg');
 
         try {
-            const response = await fetch('http://localhost:5000/verify', {
+            const response = await fetch(`${API_BASE_URL}/verify`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: imageData, subject })
             });
             const data = await response.json();
@@ -345,8 +342,6 @@ function AttendanceView({ notify }) {
         <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
             <div className="flex justify-between items-center">
                 <h2 className="text-3xl font-bold tracking-tight">Daily Attendance</h2>
-
-                {/* Active Session Close Button */}
                 {isSessionActive && (
                     <button onClick={stopSession} className="bg-red-600 hover:bg-red-500 text-white font-bold px-6 py-3 rounded-lg flex items-center shadow-lg transition-all">
                         <span className="mr-2">✖</span> Close Camera Session
@@ -354,7 +349,6 @@ function AttendanceView({ notify }) {
                 )}
             </div>
 
-            {/* --- PRE-SESSION SPREADSHEET VIEW --- */}
             {!isSessionActive && (
                 <div className="space-y-6">
                     <div className="bg-gray-800 p-6 rounded-xl border border-gray-700/50 shadow-xl flex gap-4 items-end">
@@ -420,7 +414,6 @@ function AttendanceView({ notify }) {
                 </div>
             )}
 
-            {/* --- ACTIVE SESSION CAMERA VIEW (Unchanged) --- */}
             {isSessionActive && (
                 <div className="flex flex-col lg:flex-row gap-8 animate-fade-in">
                     <div className="flex-1 bg-gray-800 p-6 rounded-xl border border-gray-700/50 shadow-xl space-y-6">
